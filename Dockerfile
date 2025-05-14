@@ -1,50 +1,16 @@
 FROM python:3.11-slim
 
+ENV DEBIAN_FRONTEND=noninteractive
 # Set platform for multi-arch builds (Docker Buildx will set this)
 ARG TARGETPLATFORM
 ARG NODE_MAJOR=20
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    netcat-traditional \
-    gnupg \
-    curl \
-    unzip \
     xvfb \
-    libgconf-2-4 \
-    libxss1 \
-    libnss3 \
-    libnspr4 \
-    libasound2 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    xdg-utils \
-    fonts-liberation \
-    dbus \
-    xauth \
-    x11vnc \
-    tigervnc-tools \
-    supervisor \
-    net-tools \
-    procps \
-    git \
-    python3-numpy \
-    fontconfig \
-    fonts-dejavu \
-    fonts-dejavu-core \
-    fonts-dejavu-extra \
-    vim \
-    && rm -rf /var/lib/apt/lists/*
+    wget git curl unzip \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1 libxrandr2 \
+    fonts-liberation fontconfig \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install noVNC
 RUN git clone https://github.com/novnc/noVNC.git /opt/novnc \
@@ -86,7 +52,6 @@ RUN mkdir -p $PLAYWRIGHT_BROWSERS_PATH
 # Alternative: Install Chromium if Google Chrome is problematic in certain environments
 RUN patchright install chromium --with-deps
 
-
 # Copy the application code
 COPY . .
 
@@ -95,6 +60,6 @@ RUN mkdir -p /var/log/supervisor
 # we only need to expose the WebUI port (Railway sets $PORT for us)
 EXPOSE 7788
 
-# launch Gradio under a virtual X display, bind to 0.0.0.0:$PORT
-CMD ["sh", "-c", "xvfb-run --server-args='-screen 0 1920x1080x24' python webui.py --ip 0.0.0.0 --port $PORT"]
-#CMD ["/bin/bash"]
+CMD ["sh", "-c", \
+    "xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' \
+       python webui.py --ip 0.0.0.0 --port $PORT"]
