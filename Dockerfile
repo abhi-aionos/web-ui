@@ -6,7 +6,7 @@ ARG TARGETPLATFORM
 ARG NODE_MAJOR=20
 
 RUN apt-get update && apt-get install -y \
-    xvfb \
+    gnupg dirmngr \
     wget git curl unzip \
     libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1 libxrandr2 \
     fonts-liberation fontconfig \
@@ -19,11 +19,13 @@ RUN git clone https://github.com/novnc/noVNC.git /opt/novnc \
 
 # Install Node.js using NodeSource PPA
 RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update \
-    && apt-get install nodejs -y \
-    && rm -rf /var/lib/apt/lists/*
+ && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+      | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+ && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" \
+      | tee /etc/apt/sources.list.d/nodesource.list \
+ && apt-get update \
+ && apt-get install nodejs -y \
+ && rm -rf /var/lib/apt/lists/*
 
 # Verify Node.js and npm installation (optional, but good for debugging)
 RUN node -v && npm -v && npx -v
