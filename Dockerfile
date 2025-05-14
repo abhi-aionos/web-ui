@@ -92,9 +92,9 @@ COPY . .
 
 # Set up supervisor configuration
 RUN mkdir -p /var/log/supervisor
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# we only need to expose the WebUI port (Railway sets $PORT for us)
+EXPOSE 7788
 
-EXPOSE 7788 6080 5901 9222
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# launch Gradio under a virtual X display, bind to 0.0.0.0:$PORT
+CMD ["sh", "-c", "xvfb-run --server-args='-screen 0 1920x1080x24' python webui.py --ip 0.0.0.0 --port $PORT"]
 #CMD ["/bin/bash"]
